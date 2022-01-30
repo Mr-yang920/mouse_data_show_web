@@ -1,0 +1,63 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30907.101
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mouse_data_show_web", "mouse_data_show_web.vcxproj", "{C5F80730-F44F-4478-BDAE-6634EFC2CA88}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "calculate_mouse_run_data", "C:\Users\19854\Documents\Arduino\calculate_mouse_run_data\calculate_mouse_run_data.vcxproj", "{51A0BCB8-C708-4CED-B578-DEBDAF9EA925}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SPI", "..\..\arduino\hardware\arduino\avr\libraries\SPI\SPI.vcxitems", "{0CCAE38B-C929-4943-B864-090FF1700CD0}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Adafruit_GFX", "C:\Users\19854\Documents\Arduino\libraries\Adafruit_GFX\Adafruit_GFX.vcxitems", "{CE23B60B-3395-422A-B34F-D4C6A03B4C5B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RTClib-master", "C:\Users\19854\Documents\Arduino\libraries\RTClib-master\RTClib-master.vcxitems", "{F7AD1F07-C7DF-46AC-8871-886D5CF2C39B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Adafruit_seesaw_Library", "C:\Users\19854\Documents\Arduino\libraries\Adafruit_seesaw_Library\Adafruit_seesaw_Library.vcxitems", "{91B4E26A-B915-411B-8565-125B47B2C923}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Adafruit_BusIO", "C:\Users\19854\Documents\Arduino\libraries\Adafruit_BusIO\Adafruit_BusIO.vcxitems", "{12EB48F3-E43F-4742-BBA4-5C519A52407B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BluetoothSerial", "C:\Users\19854\AppData\Local\arduino15\packages\esp32\hardware\esp32\1.0.6\libraries\BluetoothSerial\BluetoothSerial.vcxitems", "{0D5210FA-6B6C-43C1-A755-5C0CAF103981}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Wire", "C:\Users\19854\AppData\Local\arduino15\packages\esp32\hardware\esp32\1.0.6\libraries\Wire\Wire.vcxitems", "{78C0A610-672F-4458-B91C-60F672E3C002}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\..\arduino\hardware\arduino\avr\libraries\SPI\SPI.vcxitems*{0ccae38b-c929-4943-b864-090ff1700cd0}*SharedItemsImports = 9
+		C:\Users\19854\AppData\Local\arduino15\packages\esp32\hardware\esp32\1.0.6\libraries\BluetoothSerial\BluetoothSerial.vcxitems*{0d5210fa-6b6c-43c1-a755-5c0caf103981}*SharedItemsImports = 9
+		C:\Users\19854\Documents\Arduino\libraries\Adafruit_BusIO\Adafruit_BusIO.vcxitems*{12eb48f3-e43f-4742-bba4-5c519a52407b}*SharedItemsImports = 9
+		C:\Users\19854\AppData\Local\arduino15\packages\esp32\hardware\esp32\1.0.6\libraries\SPI\SPI.vcxitems*{51a0bcb8-c708-4ced-b578-debdaf9ea925}*SharedItemsImports = 4
+		C:\Users\19854\AppData\Local\arduino15\packages\esp32\hardware\esp32\1.0.6\libraries\Wire\Wire.vcxitems*{51a0bcb8-c708-4ced-b578-debdaf9ea925}*SharedItemsImports = 4
+		C:\Users\19854\Documents\Arduino\libraries\Adafruit_BusIO\Adafruit_BusIO.vcxitems*{51a0bcb8-c708-4ced-b578-debdaf9ea925}*SharedItemsImports = 4
+		C:\Users\19854\Documents\Arduino\libraries\Adafruit_GFX\Adafruit_GFX.vcxitems*{51a0bcb8-c708-4ced-b578-debdaf9ea925}*SharedItemsImports = 4
+		C:\Users\19854\Documents\Arduino\libraries\Adafruit_seesaw_Library\Adafruit_seesaw_Library.vcxitems*{51a0bcb8-c708-4ced-b578-debdaf9ea925}*SharedItemsImports = 4
+		C:\Users\19854\Documents\Arduino\libraries\RTClib-master\RTClib-master.vcxitems*{51a0bcb8-c708-4ced-b578-debdaf9ea925}*SharedItemsImports = 4
+		..\..\arduino\hardware\arduino\avr\libraries\SPI\SPI.vcxitems*{51a0bcb8-c708-4ced-b578-debdaf9ea925}*SharedItemsImports = 4
+		C:\Users\19854\AppData\Local\arduino15\packages\esp32\hardware\esp32\1.0.6\libraries\Wire\Wire.vcxitems*{78c0a610-672f-4458-b91c-60f672e3c002}*SharedItemsImports = 9
+		C:\Users\19854\Documents\Arduino\libraries\Adafruit_seesaw_Library\Adafruit_seesaw_Library.vcxitems*{91b4e26a-b915-411b-8565-125b47b2c923}*SharedItemsImports = 9
+		C:\Users\19854\AppData\Local\arduino15\packages\esp32\hardware\esp32\1.0.6\libraries\BluetoothSerial\BluetoothSerial.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
+		C:\Users\19854\Documents\Arduino\libraries\Adafruit_BusIO\Adafruit_BusIO.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
+		C:\Users\19854\Documents\Arduino\libraries\Adafruit_GFX\Adafruit_GFX.vcxitems*{ce23b60b-3395-422a-b34f-d4c6a03b4c5b}*SharedItemsImports = 9
+		C:\Users\19854\Documents\Arduino\libraries\RTClib-master\RTClib-master.vcxitems*{f7ad1f07-c7df-46ac-8871-886d5cf2c39b}*SharedItemsImports = 9
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Debug|x86.ActiveCfg = Debug|Win32
+		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Debug|x86.Build.0 = Debug|Win32
+		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Release|x86.ActiveCfg = Release|Win32
+		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Release|x86.Build.0 = Release|Win32
+		{51A0BCB8-C708-4CED-B578-DEBDAF9EA925}.Debug|x86.ActiveCfg = Debug|Win32
+		{51A0BCB8-C708-4CED-B578-DEBDAF9EA925}.Debug|x86.Build.0 = Debug|Win32
+		{51A0BCB8-C708-4CED-B578-DEBDAF9EA925}.Release|x86.ActiveCfg = Release|Win32
+		{51A0BCB8-C708-4CED-B578-DEBDAF9EA925}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E33601DB-D547-4D4F-815D-3B022F246793}
+	EndGlobalSection
+EndGlobal
