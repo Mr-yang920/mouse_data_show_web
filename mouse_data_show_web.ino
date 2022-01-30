@@ -11,10 +11,10 @@
 #include <AsyncTCP.h>
 #include "DHT.h"
 #include "Adafruit_Sensor.h"
-#define DHTPIN 21   //DHT11 DATA 数据引脚
+#define DHTPIN 23   //DHT11 DATA 数据引脚
 #define DHTTYPE DHT11  //选择的类型
 
-#define HALLPIN1 19
+#define HALLPIN1 33
 #define HALLPIN2 18
 #define HALLPIN3 5
 #define HALLPIN4 17
@@ -24,13 +24,15 @@
 #define SAVELOG
 
 //#define test
+
 const char* ssid = "web_show";//设置热点名称(自定义)
 const char* password = "1234567890";//设置热点密码(自定义)
-const char* ssid_sta = "long";//设置热点名称(自定义)
-const char* password_sta = "yy201011";//设置热点密码(自定义)
+const char* ssid_sta = "abc";//设置热点名称(自定义)
+const char* password_sta = "1234567890";//设置热点密码(自定义)
 AsyncWebServer server(80);//web服务器端口号
 RTC_DS3231 rtc;
 DHT dht(DHTPIN , DHTTYPE);
+
 //BluetoothSerial SerialBT;
 
 #ifdef test
@@ -50,6 +52,8 @@ struct Time
 
 double sendRunData_R[4][60] = {};//4个跑轮，每个60个数据
 int sendHumiture_R[2][24] = {};//温湿度，24小时数据
+int time_num_mm = 0;//用于记录跑动数据存储数组的索引值
+int time_num_hh = 0;//用于记录温湿度存储数组的索引值
 //float mouseRunNum1 = 0 , mouseRunNum2 = 0 , mouseRunNum3 = 0 , mouseRunNum4 = 0;
 
 
@@ -62,6 +66,7 @@ void showData(String data , bool printType = false , bool type = true);
 
 void setup()
 {
+    
     Serial.begin(115200);//开启串口打印
     //SerialBT.begin("mouse");
     //初始化闪存系统
@@ -86,7 +91,7 @@ void setup()
 
     if ( !rtc.begin() )
     {
-        Serial.println("时钟未连接，最终程序");
+        Serial.println("时钟未连接/未连接正确");
         Serial.flush();
         while ( 1 ) delay(10);
     }
@@ -162,14 +167,17 @@ void setup()
         server.on("/getServerTime" , HTTP_POST , getServerTime);
         server.on("/setServerTime" , HTTP_POST , setServerTime);
         server.begin();//开启web服务器 
+       
         //WiFi.mode(WIFI_MODE_NULL);
     } else
     {
         Serial.println("不存在控制台文件");
     }
-    savaRunData();
+    //savaRunData();
     saveHumitureData();
-
+    //更新当前索引存储数据的
+    DateTime now = rtc.now();
+    time_num_mm = now.minute();
     pinMode(0 , INPUT);
     xTaskCreatePinnedToCore(
         runData_tack                                     //创建任务
@@ -205,13 +213,23 @@ void showWifi(void* pvParameters)
         if ( num == 3 )
         {
             num = 0;
-            if ( WiFi.getMode() == WIFI_MODE_APSTA || WiFi.getMode() == WIFI_MODE_AP || WiFi.getMode() == WIFI_MODE_STA )
+            if ( WiFi.getMode() != WIFI_MODE_NULL )
             {
                 Serial.print("wifi状态不应该被更改，现在最终");
+                if ( WiFi.status() != WL_CONNECTED )
+                {
+                    Serial.print("尝试重新连接wifi中。。。");
+                    WiFi.disconnect();
+                    WiFi.reconnect();
+                } else
+                {
+                    Serial.print("wifi状态正常");
+                }
                 continue;
             }
             /* WiFi.mode(WIFI_MODE_NULL);
              vTaskDelay(1000);*/
+            WiFi.setSleep(false);
             num = 0;
             WiFi.mode(WIFI_MODE_APSTA);
             WiFi.softAP(ssid , password);
@@ -713,20 +731,108 @@ void saveHumitureData()
     saveLog("saveHumitureData");
 }
 
-int time_num_mm = 0;//用于记录跑动数据存储数组的索引值
-int time_num_hh = 0;//用于记录温湿度存储数组的索引值
+
 int wifiConnNum = 0;
+int mouseRestTime = 0;
 void loop()
 {
+    
 #ifndef test
-    delay(1000 * 60);//等待一分钟
+    delay(60*1000);//等待一分钟
     wifiConnNum++;
-    if ( wifiConnNum > 5 )
+    if ( wifiConnNum >= 5 )//wifi连接5分钟自动关闭
     {
-        WiFi.mode(WIFI_MODE_NULL);//wifi连接5分钟自动关闭
-        wifiConnNum = 0;
-    }
+        if ( WiFi.getMode() != WIFI_MODE_NULL )
+        {
+            Serial.println("断开wifi");
+            WiFi.disconnect();//断开wifi
+            WiFi.mode(WIFI_MODE_NULL);//wifi模式为不连接
+            WiFi.setSleep(true);//wifi开始休眠
+            wifiConnNum = 0;
+        }
 
+    }
+    if ( runData1 == 0 )
+    {
+        mouseRestTime++;
+    } else
+    {
+        mouseRestTime = 0;
+    }
+    if ( mouseRestTime >= 10 )
+    {
+        Serial.println("设备即将休眠");
+        saveLog("设备休眠");
+        DateTime now = rtc.now();
+        int nowMinute = now.minute();
+        int timeNum = 60 - nowMinute;
+        Serial.print(timeNum - 1);
+        Serial.println("分钟后自动唤醒");
+        mouseRestTime = 0;
+        //将这一个时间点后的所以数据填充为0
+        for ( size_t i = nowMinute; i < timeNum; i++ )
+        {
+            sendRunData_R[0][nowMinute - 1] = 0;
+            sendRunData_R[1][nowMinute - 1] = 0;
+            sendRunData_R[2][nowMinute - 1] = 0;
+            sendRunData_R[3][nowMinute - 1] = 0;
+        }
+        //进入低功耗模式
+        esp_sleep_enable_ext0_wakeup(GPIO_NUM_33 , 0);//设置外部按键唤醒
+        esp_sleep_enable_timer_wakeup(( (uint64_t) (timeNum) -1 ) * 60 * 1000 * 1000);//如果没有被外部触发到这一个小时的59分自动唤醒，已保持这一个小时的数据
+        delay(1000);
+        esp_light_sleep_start();//开始睡眠
+        //Serial.println(esp_sleep_get_wakeup_cause());
+        String log_ = "设备被唤醒，唤醒类型@";
+        log_ += esp_sleep_get_wakeup_cause();
+        saveLog(log_);
+        Serial.print("设备被唤醒@");
+        DateTime now1 = rtc.now();//更新时间
+        if ( now.minute() > now1.minute() )
+        {
+            //时钟唤醒
+            switch ( esp_sleep_get_wakeup_cause() ) //获取唤醒原因
+
+            {
+
+                case ESP_SLEEP_WAKEUP_TIMER: Serial.println("通过定时器唤醒"); break;
+
+                case ESP_SLEEP_WAKEUP_TOUCHPAD: Serial.println("通过触摸唤醒"); break;
+
+                case ESP_SLEEP_WAKEUP_EXT0: Serial.println("通过EXT0唤醒"); break;
+
+                case ESP_SLEEP_WAKEUP_EXT1: Serial.println("通过EXT1唤醒"); break;
+
+                case ESP_SLEEP_WAKEUP_ULP: Serial.println("通过ULP唤醒"); break;
+
+                default: Serial.println("并非从DeepSleep中唤醒"); break;
+
+            }
+            time_num_mm = now1.minute();
+        } else
+        {
+            //外部唤醒
+            switch ( esp_sleep_get_wakeup_cause() ) //获取唤醒原因
+
+            {
+
+                case ESP_SLEEP_WAKEUP_TIMER: Serial.println("通过定时器唤醒"); break;
+
+                case ESP_SLEEP_WAKEUP_TOUCHPAD: Serial.println("通过触摸唤醒"); break;
+
+                case ESP_SLEEP_WAKEUP_EXT0: Serial.println("通过EXT0唤醒"); break;
+
+                case ESP_SLEEP_WAKEUP_EXT1: Serial.println("通过EXT1唤醒"); break;
+
+                case ESP_SLEEP_WAKEUP_ULP: Serial.println("通过ULP唤醒"); break;
+
+                default: Serial.println("并非从DeepSleep中唤醒"); break;
+
+            }
+            //保存上一个小时的数据
+            time_num_mm = now1.minute();
+        }
+}
     //delay(2000);
     sendRunData_R[0][time_num_mm - 1] = runData1;
     sendRunData_R[1][time_num_mm - 1] = runData2;
@@ -752,15 +858,113 @@ void loop()
     time_num_mm++;
 
 #ifdef test
-    /*sendRunData_R[0][time_num_mm - 1] = random(0 , 100);
-    sendRunData_R[1][time_num_mm - 1] = random(0 , 100);
-    sendRunData_R[2][time_num_mm - 1] = random(0 , 100);
-    sendRunData_R[3][time_num_mm - 1] = random(0 , 100);*/
+    delay(1000);//等待一分钟
+    wifiConnNum++;
+    if ( wifiConnNum >= 30 )//wifi连接5分钟自动关闭
+    {
+        if ( WiFi.getMode() != WIFI_MODE_NULL )
+        {
+            Serial.println("断开wifi");
+            WiFi.disconnect();//断开wifi
+            WiFi.mode(WIFI_MODE_NULL);//wifi模式为不连接
+            WiFi.setSleep(true);//wifi开始休眠
+            wifiConnNum = 0;
+        }
+       
+    }
+    if ( runData1 == 0 )
+    {
+        mouseRestTime++;
+    } else
+    {
+        mouseRestTime = 0;
+    }
+    if ( mouseRestTime >= 15 )
+    {
+        Serial.println("设备即将休眠");
+        
+        DateTime now = rtc.now();
+        int nowMinute = now.minute();
+        int timeNum = 60 - nowMinute;
+        Serial.print(timeNum-1);
+        Serial.println("分钟后自动唤醒");
+        mouseRestTime = 0;
+        //将这一个时间点后的所以数据填充为0
+        for ( size_t i = nowMinute; i < timeNum; i++ )
+        {
+            sendRunData_R[0][nowMinute - 1] = 0;
+            sendRunData_R[1][nowMinute - 1] = 0;
+            sendRunData_R[2][nowMinute - 1] = 0;
+            sendRunData_R[3][nowMinute - 1] = 0;
+        }
+        //进入低功耗模式
+        esp_sleep_enable_ext0_wakeup(GPIO_NUM_33 , 0);//设置外部按键唤醒
+        esp_sleep_enable_timer_wakeup(((uint64_t)(timeNum)-1) * 60 * 1000 * 1000);//如果没有被外部触发到这一个小时的59分自动唤醒，已保持这一个小时的数据
+        delay(1000);
+        esp_light_sleep_start();//开始睡眠
+        //Serial.println(esp_sleep_get_wakeup_cause());
+        Serial.print("设备被唤醒@");
+        DateTime now1 = rtc.now();//更新时间
+        if ( now.minute() > now1.minute() )
+        {
+            //时钟唤醒
+            switch ( esp_sleep_get_wakeup_cause() ) //获取唤醒原因
 
+            {
+
+                case ESP_SLEEP_WAKEUP_TIMER: Serial.println("通过定时器唤醒"); break;
+
+                case ESP_SLEEP_WAKEUP_TOUCHPAD: Serial.println("通过触摸唤醒"); break;
+
+                case ESP_SLEEP_WAKEUP_EXT0: Serial.println("通过EXT0唤醒"); break;
+
+                case ESP_SLEEP_WAKEUP_EXT1: Serial.println("通过EXT1唤醒"); break;
+
+                case ESP_SLEEP_WAKEUP_ULP: Serial.println("通过ULP唤醒"); break;
+
+                default: Serial.println("并非从DeepSleep中唤醒"); break;
+
+            }
+            time_num_mm = now1.minute();
+        } else
+        {
+            //外部唤醒
+            switch ( esp_sleep_get_wakeup_cause() ) //获取唤醒原因
+
+            {
+
+                case ESP_SLEEP_WAKEUP_TIMER: Serial.println("通过定时器唤醒"); break;
+
+                case ESP_SLEEP_WAKEUP_TOUCHPAD: Serial.println("通过触摸唤醒"); break;
+
+                case ESP_SLEEP_WAKEUP_EXT0: Serial.println("通过EXT0唤醒"); break;
+
+                case ESP_SLEEP_WAKEUP_EXT1: Serial.println("通过EXT1唤醒"); break;
+
+                case ESP_SLEEP_WAKEUP_ULP: Serial.println("通过ULP唤醒"); break;
+
+                default: Serial.println("并非从DeepSleep中唤醒"); break;
+
+            }
+            //保存上一个小时的数据
+            time_num_mm = now1.minute();
+        }
+    }
+    //delay(2000);
     sendRunData_R[0][time_num_mm - 1] = runData1;
     sendRunData_R[1][time_num_mm - 1] = runData2;
     sendRunData_R[2][time_num_mm - 1] = runData3;
     sendRunData_R[3][time_num_mm - 1] = runData4;
+    String sData_t = (String) time_num_mm;
+    sData_t += " minute:runData1@";
+    sData_t += sendRunData_R[0][time_num_mm - 1];
+    sData_t += "\trunData2@";
+    sData_t += sendRunData_R[1][time_num_mm - 1];
+    sData_t += "\trunData3@";
+    sData_t += sendRunData_R[2][time_num_mm - 1];
+    sData_t += "\trunData4@";
+    sData_t += sendRunData_R[3][time_num_mm - 1];
+    showData(sData_t , true);
 #endif // test
 
     runData1 = 0 , runData2 = 0 , runData3 = 0 , runData4 = 0;
